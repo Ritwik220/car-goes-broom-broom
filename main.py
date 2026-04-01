@@ -16,6 +16,8 @@ FPS = 60
 HEIGHT = 800
 WIDTH = 800
 FRAME_PER_SEC = pygame.time.Clock()
+
+# Player class
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__() 
@@ -35,9 +37,27 @@ class Player(pygame.sprite.Sprite):
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
+# Enemy class
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self):
+        self.image = pygame.image.load("Enemy.png")
+        self.rect = self.image.get_rect()
+        self.rect.center = (random.randint(30, WIDTH - 30), 10)
+    
+    def move(self):
+        self.rect.move_ip(0, 5)
+        if self.rect.bottom > HEIGHT:
+            self.rect.top = 0
+            self.rect.center = (random.randint(30, WIDTH - 30), 10)
+    
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+
 dis = pygame.display.set_mode((WIDTH, HEIGHT))
 dis.fill(WHITE)
 player = Player()
+enemy = Enemy()
 
 while True:
     for event in pygame.event.get():
@@ -46,6 +66,8 @@ while True:
             sys.exit()
     FRAME_PER_SEC.tick(60)
     dis.fill(WHITE)
+    enemy.draw(dis)
+    enemy.move()
     player.draw(dis)
     player.update()
     pygame.display.update()
