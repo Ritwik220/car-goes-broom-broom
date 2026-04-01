@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 import sys, random
+import time
 pygame.init()
 print(pygame.image.get_extended())
 
@@ -25,7 +26,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (WIDTH/2, HEIGHT/2)
     
-    def update(self):
+    def move(self):
         pressed_keys = pygame.key.get_pressed()
         if self.rect.left > 0:
             if pressed_keys[K_LEFT]:
@@ -34,12 +35,11 @@ class Player(pygame.sprite.Sprite):
             if pressed_keys[K_RIGHT]:
                 self.rect.move_ip(5, 0)
     
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
 
 # Enemy class
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
+        super().__init__()
         self.image = pygame.image.load("Enemy.png")
         self.rect = self.image.get_rect()
         self.rect.center = (random.randint(30, WIDTH - 30), 10)
@@ -50,14 +50,18 @@ class Enemy(pygame.sprite.Sprite):
             self.rect.top = 0
             self.rect.center = (random.randint(30, WIDTH - 30), 10)
     
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
 
 
 dis = pygame.display.set_mode((WIDTH, HEIGHT))
 dis.fill(WHITE)
 player = Player()
 enemy = Enemy()
+
+enemies = pygame.sprite.Group()
+enemies.add(enemy)
+all_sprite = pygame.sprite.Group()
+all_sprite.add(enemy)
+all_sprite.add(player)
 
 while True:
     for event in pygame.event.get():
@@ -66,8 +70,14 @@ while True:
             sys.exit()
     FRAME_PER_SEC.tick(60)
     dis.fill(WHITE)
-    enemy.draw(dis)
-    enemy.move()
-    player.draw(dis)
-    player.update()
+    for entity in all_sprite:
+        dis.blit(entity.image, entity.rect)
+        entity.move()
+    if pygame.sprite.spritecollideany(player, enemies):
+        dis.fill(RED)
+        pygame.display.update()
+        for entity in all_sprite:
+            entity.kill()
+        time.sleep(2)
+        sys.exit()
     pygame.display.update()
