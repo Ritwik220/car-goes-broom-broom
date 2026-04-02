@@ -15,11 +15,19 @@ WHITE = (255, 255, 255)
 
 SPEED = 5
 FPS = 60
-HEIGHT = 800
-WIDTH = 800
+SCORE = 0
+HEIGHT = 600
+WIDTH = 400
 FRAME_PER_SEC = pygame.time.Clock()
 INC_SPEED = pygame.USEREVENT + 1
 pygame.time.set_timer(INC_SPEED, 100)
+
+
+font = pygame.font.SysFont('Verdana', 60)
+small_font = pygame.font.SysFont('Verdana', 20)
+game_over = font.render("Game Over", True, BLACK)
+
+background = pygame.image.load("AnimatedStreet.png")
 
 # Player class
 class Player(pygame.sprite.Sprite):
@@ -48,8 +56,10 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.center = (random.randint(30, WIDTH - 30), 10)
     
     def move(self, speed):
+        global SCORE
         self.rect.move_ip(0, speed)
         if self.rect.bottom > HEIGHT:
+            SCORE += 1
             self.rect.top = 0
             self.rect.center = (random.randint(30, WIDTH - 30), 10)
     
@@ -57,6 +67,7 @@ class Enemy(pygame.sprite.Sprite):
 
 dis = pygame.display.set_mode((WIDTH, HEIGHT))
 dis.fill(WHITE)
+pygame.display.set_caption("Game")
 player = Player()
 enemy = Enemy()
 
@@ -74,12 +85,16 @@ while True:
             pygame.quit()
             sys.exit()
     FRAME_PER_SEC.tick(60)
-    dis.fill(WHITE)
+    dis.blit(background, (0,0))
+    scores = small_font.render(str(SCORE), True, BLACK)
+    dis.blit(scores, (10,10))
     for entity in all_sprite:
         dis.blit(entity.image, entity.rect)
         entity.move(SPEED)
     if pygame.sprite.spritecollideany(player, enemies):
+        pygame.mixer.Sound('crash.wav').play()
         dis.fill(RED)
+        dis.blit(game_over, (35, 250))
         pygame.display.update()
         for entity in all_sprite:
             entity.kill()
